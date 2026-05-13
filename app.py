@@ -228,6 +228,28 @@ def upload_inventory():
     save_inventory(df)
     return redirect(url_for("admin"))
 
+from flask import Response
+
+@app.route("/whatsapp", methods=["POST"])
+def whatsapp_webhook():
+    incoming_msg = request.form.get("Body", "").strip()
+    customer_phone = request.form.get("From", "")
+
+    response = generate_bot_reply(
+        incoming_msg,
+        customer_phone=customer_phone,
+        shop_type=None
+    )
+
+    reply_text = response["reply"]
+
+    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>{reply_text}</Message>
+</Response>"""
+
+    return Response(twiml, mimetype="application/xml")    
+
 
 if __name__ == "__main__":
     app.run(debug=True)
