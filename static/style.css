@@ -1,0 +1,158 @@
+body {
+  margin: 0;
+  font-family: Segoe UI, Arial, sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.page {
+  max-width: 1150px;
+  margin: auto;
+  padding: 24px;
+}
+
+.hero {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: white;
+  padding: 42px;
+  border-radius: 22px;
+  margin-bottom: 24px;
+}
+
+.hero.small {
+  padding: 28px;
+}
+
+.hero h1 {
+  margin-top: 0;
+  font-size: 34px;
+}
+
+.hero p {
+  font-size: 17px;
+  max-width: 850px;
+}
+
+.card {
+  background: white;
+  padding: 26px;
+  border-radius: 18px;
+  margin-bottom: 22px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.search-form,
+.request-form {
+  display: grid;
+  grid-template-columns: 1fr 220px 140px;
+  gap: 12px;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+input,
+select,
+button {
+  padding: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+button {
+  background: #0f766e;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #115e59;
+}
+
+.link-btn {
+  display: inline-block;
+  padding: 11px 16px;
+  background: white;
+  color: #0f766e;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.link-btn.dark {
+  background: #0f766e;
+  color: white;
+}
+
+.reply {
+  background: #ecfdf5;
+  border-left: 5px solid #0f766e;
+  padding: 18px;
+  border-radius: 12px;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.product-card {
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.product-card h3 {
+  margin-top: 0;
+}
+
+.status {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+th {
+  background: #f1f5f9;
+}
+
+.hint {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.success {
+  text-align: center;
+  margin-top: 80px;
+}
+
+@media (max-width: 800px) {
+  .search-form,
+  .request-form,
+  .admin-form,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

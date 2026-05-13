@@ -1,0 +1,8 @@
+shop_id,shop_name,shop_type,product_name,category,brand,variant,price,quantity,status
+S001,City Medicals,Medical Shop,Dolo 650,Tablet,Micro Labs,650mg,32,15,available
+S001,City Medicals,Medical Shop,Paracetamol 500,Tablet,Generic,500mg,20,0,out_of_stock
+S002,Sri Mobile Hub,Mobile Store,Samsung 25W Charger,Charger,Samsung,Type-C,1299,6,available
+S002,Sri Mobile Hub,Mobile Store,iPhone 15 Back Cover,Mobile Accessory,Apple Compatible,Transparent,299,4,available
+S003,ABC Hardware,Hardware Store,1 Inch PVC Pipe,Plumbing,Finolex,1 inch,180,20,available
+S004,Raja Auto Spares,Auto Spare Parts,Activa Brake Pad,Brake Parts,TVS Compatible,Activa,350,8,available
+S005,Home Comfort Furniture,Furniture Shop,Wooden Cot,Furniture,Local,6x4,8500,2,available

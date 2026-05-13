@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero small">
+      <h1>Admin Dashboard</h1>
+      <p>Manage inventory and view customer product requests.</p>
+      <a href="/" class="link-btn">Back to Search</a>
+    </header>
+
+    <section class="card">
+      <h2>Add Product</h2>
+      <form action="/admin/add-product" method="POST" class="admin-form">
+        <input name="shop_id" placeholder="Shop ID" required>
+        <input name="shop_name" placeholder="Shop Name" required>
+        <input name="shop_type" placeholder="Shop Type" required>
+        <input name="product_name" placeholder="Product Name" required>
+        <input name="category" placeholder="Category">
+        <input name="brand" placeholder="Brand">
+        <input name="variant" placeholder="Variant">
+        <input name="price" placeholder="Price" type="number">
+        <input name="quantity" placeholder="Quantity" type="number">
+        <select name="status">
+          <option value="available">available</option>
+          <option value="out_of_stock">out_of_stock</option>
+          <option value="low_stock">low_stock</option>
+        </select>
+        <button type="submit">Add Product</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Upload Inventory CSV</h2>
+      <form action="/admin/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="inventory_file" accept=".csv" required>
+        <button type="submit">Upload</button>
+      </form>
+      <p class="hint">Required columns: shop_id, shop_name, shop_type, product_name, category, brand, variant, price, quantity, status</p>
+    </section>
+
+    <section class="card">
+      <h2>Customer Requests</h2>
+      <table>
+        <tr>
+          <th>Request ID</th>
+          <th>Customer Phone</th>
+          <th>Shop ID</th>
+          <th>Requested Product</th>
+          <th>Created At</th>
+          <th>Status</th>
+        </tr>
+        {% for r in requests_data %}
+        <tr>
+          <td>{{ r.request_id }}</td>
+          <td>{{ r.customer_phone }}</td>
+          <td>{{ r.shop_id }}</td>
+          <td>{{ r.requested_product }}</td>
+          <td>{{ r.created_at }}</td>
+          <td>{{ r.status }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Inventory</h2>
+      <table>
+        <tr>
+          <th>Shop</th>
+          <th>Type</th>
+          <th>Product</th>
+          <th>Brand</th>
+          <th>Variant</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Status</th>
+        </tr>
+        {% for item in inventory %}
+        <tr>
+          <td>{{ item.shop_name }}</td>
+          <td>{{ item.shop_type }}</td>
+          <td>{{ item.product_name }}</td>
+          <td>{{ item.brand }}</td>
+          <td>{{ item.variant }}</td>
+          <td>Rs.{{ item.price }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Local Store Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>Local Store WhatsApp Product Assistant</h1>
+      <p>Search product availability across medical, mobile, hardware, auto spares, furniture and other local stores.</p>
+      <a href="/admin" class="link-btn">Admin Dashboard</a>
+    </header>
+
+    <section class="card">
+      <h2>Customer Product Search</h2>
+      <form action="/search" method="POST" class="search-form">
+        <input type="text" name="query" placeholder="Example: Dolo 650, Samsung charger, PVC pipe" value="{{ query or '' }}" required>
+        <select name="shop_type">
+          {% for st in shop_types %}
+            <option value="{{ st }}" {% if selected_shop_type == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Search</button>
+      </form>
+    </section>
+
+    {% if response %}
+      <section class="card">
+        <h2>Bot Reply</h2>
+        <pre class="reply">{{ response.reply }}</pre>
+
+        {% if not response.found %}
+          <form action="/request-product" method="POST" class="request-form">
+            <h3>Request this product</h3>
+            <input type="text" name="requested_product" value="{{ query }}" required>
+            <input type="text" name="customer_phone" placeholder="Customer phone number">
+            <input type="text" name="shop_id" placeholder="Preferred shop ID, optional">
+            <button type="submit">Submit Request</button>
+          </form>
+        {% endif %}
+      </section>
+
+      {% if response.results %}
+      <section class="card">
+        <h2>Matching Products</h2>
+        <div class="grid">
+          {% for item in response.results %}
+          <div class="product-card">
+            <h3>{{ item.product_name }}</h3>
+            <p><b>Shop:</b> {{ item.shop_name }} | {{ item.shop_type }}</p>
+            <p><b>Brand:</b> {{ item.brand }} | <b>Variant:</b> {{ item.variant }}</p>
+            <p><b>Price:</b> Rs.{{ item.price }} | <b>Stock:</b> {{ item.quantity }}</p>
+            <p class="status">{{ item.availability_message }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    {% endif %}
+  </div>
+</body>
+</html>
