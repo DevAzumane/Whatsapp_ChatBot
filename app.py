@@ -56,6 +56,26 @@ def load_inventory():
 
     df = pd.read_excel(INVENTORY_FILE)
 
+    # normalize columns
+    df.columns = df.columns.str.strip().str.lower()
+
+    required_cols = [
+        "shop_id",
+        "shop_name",
+        "shop_type",
+        "product_name",
+        "category",
+        "brand",
+        "variant",
+        "price",
+        "quantity",
+        "status"
+    ]
+
+    for col in required_cols:
+        if col not in df.columns:
+            df[col] = ""
+
     df["quantity"] = (
         pd.to_numeric(df["quantity"], errors="coerce")
         .fillna(0)
@@ -75,7 +95,7 @@ def save_inventory(df):
 
     DATA_DIR.mkdir(exist_ok=True)
 
-    df.to_csv(INVENTORY_FILE, index=False)
+    df.to_excel(INVENTORY_FILE, index=False)
 
 
 
@@ -468,7 +488,7 @@ def upload_inventory():
     if not file:
         return redirect(url_for("admin"))
 
-    df = pd.read_csv(file)
+    df = pd.read_excel(file)
 
     required_cols = [
         "shop_id",
