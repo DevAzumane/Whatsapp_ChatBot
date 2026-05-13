@@ -165,48 +165,26 @@ def search_products(query, shop_type=None, limit=8):
 def format_product_response(results):
 
     if not results:
-
         return (
-            "━━━━━━━━━━━━━━━
-"
-            "❌ PRODUCT NOT FOUND
-"
-            "━━━━━━━━━━━━━━━
-
-"
+            "━━━━━━━━━━━━━━━\n"
+            "❌ PRODUCT NOT FOUND\n"
+            "━━━━━━━━━━━━━━━\n\n"
             "Try another keyword."
         )
-
     top = results[0]
 
     message = (
-        "━━━━━━━━━━━━━━━
-"
-        "🛍 SHOPBOT AI
-"
-        "━━━━━━━━━━━━━━━
-
-"
-
-        "✅ PRODUCT FOUND
-
-"
-
-        f"📦 {top['product_name']}
-"
-        f"🏪 {top['shop_name']}
-"
-        f"🧾 {top['category']}
-"
-        f"🏷 {top['brand']}
-"
-        f"📌 {top['variant']}
-"
-        f"💰 Rs.{top['price']}
-"
-        f"📦 Stock: {top['quantity']}
-
-"
+        "━━━━━━━━━━━━━━━\n"
+        "🛍 SHOPBOT AI\n"
+        "━━━━━━━━━━━━━━━\n\n"
+        "✅ PRODUCT FOUND\n\n"
+        f"📦 {top['product_name']}\n"
+        f"🏪 {top['shop_name']}\n"
+        f"🧾 {top['category']}\n"
+        f"🏷 {top['brand']}\n"
+        f"📌 {top['variant']}\n"
+        f"💰 Rs.{top['price']}\n"
+        f"📦 Stock: {top['quantity']}\n\n"
     )
 
     alternatives = results[1:4]
@@ -214,24 +192,17 @@ def format_product_response(results):
     if alternatives:
 
         message += (
-            "━━━━━━━━━━━━━━━
-"
-            "🔄 MORE OPTIONS
-"
-            "━━━━━━━━━━━━━━━
-"
+            "━━━━━━━━━━━━━━━"
+            "🔄 MORE OPTIONS"
+            "━━━━━━━━━━━━━━━"
         )
 
         for idx, item in enumerate(alternatives, start=1):
 
             message += (
-                f"
-{idx}️⃣ {item['product_name']}"
-                f"
-💰 Rs.{item['price']}"
-                f"
-🏪 {item['shop_name']}
-"
+                f"\n{idx}️⃣ {item['product_name']}"
+                f"\n💰 Rs.{item['price']}"
+                f"\n🏪 {item['shop_name']}\n"
             )
 
     return message
@@ -253,33 +224,19 @@ def process_message(message, customer_phone):
     if text in ["hi", "hello", "hey", "start"]:
 
         return (
-            "━━━━━━━━━━━━━━━
-"
-            "🤖 WELCOME TO SHOPBOT
-"
-            "━━━━━━━━━━━━━━━
+            "━━━━━━━━━━━━━━━\n"
+            "🤖 WELCOME TO SHOPBOT\n"
+            "━━━━━━━━━━━━━━━\n\n"
 
-"
+            "🔍 Search products instantly\n"
+            "🛒 Find nearby shop inventory\n"
+            "⚡ Fast AI product matching\n\n"
 
-            "🔍 Search products instantly
-"
-            "🛒 Find nearby shop inventory
-"
-            "⚡ Fast AI product matching
-
-"
-
-            "📌 Example Searches:
-"
-            "• iphone 15
-"
-            "• samsung tv
-"
-            "• airpods
-"
-            "• milk powder
-
-"
+            "📌 Example Searches:\n"
+            "• iphone 15\n"
+            "• samsung tv\n"
+            "• airpods\n"
+            "• milk powder\n\n"
 
             "📚 Type *help* for commands"
         )
@@ -291,32 +248,19 @@ def process_message(message, customer_phone):
     if text == "help":
 
         return (
-            "━━━━━━━━━━━━━━━
-"
-            "📚 HELP MENU
-"
-            "━━━━━━━━━━━━━━━
+            "━━━━━━━━━━━━━━━\n"
+            "📚 HELP MENU\n"
+            "━━━━━━━━━━━━━━━\n\n"
 
-"
+            "🔍 Search Product\n"
+            "Send any product name\n\n"
 
-            "🔍 Search Product
-"
-            "Send any product name
+            "📝 Request Product\n"
+            "request:iphone 15\n\n"
 
-"
-
-            "📝 Request Product
-"
-            "request:iphone 15
-
-"
-
-            "📦 Examples:
-"
-            "• iphone
-"
-            "• dairy milk
-"
+            "📦 Examples:\n"
+            "• iphone\n"
+            "• dairy milk\n"
             "• earbuds"
         )
 
@@ -355,16 +299,10 @@ def process_message(message, customer_phone):
         save_requests(requests_df)
 
         return (
-            "━━━━━━━━━━━━━━━
-"
-            "✅ REQUEST SUBMITTED
-"
-            "━━━━━━━━━━━━━━━
-
-"
-            f"📦 Product: {product}
-
-"
+            "━━━━━━━━━━━━━━━"
+            "✅ REQUEST SUBMITTED"
+            "━━━━━━━━━━━━━━━"
+            f"📦 Product: {product}"
             "Our team will contact you shortly."
         )
 
