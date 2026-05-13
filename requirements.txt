@@ -1,6 +1,8 @@
 Flask==3.0.3
-rapidfuzz==3.9.6
-python-dotenv==1.0.1
-pandas==2.2.3
 gunicorn==22.0.0
-twilio
+pandas==2.2.3
+rapidfuzz==3.9.7
+twilio==9.3.0
+python-dotenv==1.0.1
+requests==2.32.3
+openpyxl==3.1.5
