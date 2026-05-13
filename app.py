@@ -1,138 +1,404 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    abort
+)
+
 from rapidfuzz import fuzz
+from twilio.twiml.messaging_response import MessagingResponse
+
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
 import uuid
+import os
+
 
 app = Flask(__name__)
+
+# =========================================================
+# CONFIG
+# =========================================================
 
 DATA_DIR = Path("data")
 INVENTORY_FILE = DATA_DIR / "inventory.csv"
 REQUESTS_FILE = DATA_DIR / "requests.csv"
 
+ADMIN_KEY = os.getenv("ADMIN_KEY", "shopbot123")
+
+
+# =========================================================
+# FILE HELPERS
+# =========================================================
 
 def load_inventory():
+
     if not INVENTORY_FILE.exists():
+
         return pd.DataFrame(columns=[
-            "shop_id", "shop_name", "shop_type", "product_name", "category",
-            "brand", "variant", "price", "quantity", "status"
+            "shop_id",
+            "shop_name",
+            "shop_type",
+            "product_name",
+            "category",
+            "brand",
+            "variant",
+            "price",
+            "quantity",
+            "status"
         ])
+
     df = pd.read_csv(INVENTORY_FILE)
-    df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
-    df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0)
+
+    df["quantity"] = (
+        pd.to_numeric(df["quantity"], errors="coerce")
+        .fillna(0)
+        .astype(int)
+    )
+
+    df["price"] = (
+        pd.to_numeric(df["price"], errors="coerce")
+        .fillna(0)
+    )
+
     return df
 
 
 def save_inventory(df):
+
     DATA_DIR.mkdir(exist_ok=True)
+
     df.to_csv(INVENTORY_FILE, index=False)
 
 
 def load_requests():
+
     if not REQUESTS_FILE.exists():
+
         return pd.DataFrame(columns=[
-            "request_id", "customer_phone", "shop_id",
-            "requested_product", "created_at", "status"
+            "request_id",
+            "customer_phone",
+            "shop_id",
+            "requested_product",
+            "created_at",
+            "status"
         ])
+
     return pd.read_csv(REQUESTS_FILE)
 
 
 def save_requests(df):
+
     DATA_DIR.mkdir(exist_ok=True)
+
     df.to_csv(REQUESTS_FILE, index=False)
 
 
+# =========================================================
+# BUSINESS LOGIC
+# =========================================================
+
 def build_availability_message(item):
+
     qty = int(item.get("quantity", 0))
     status = str(item.get("status", "")).lower()
 
     if qty > 0 and status == "available":
-        return f"Available. Stock: {qty}. Price: Rs.{item.get('price')}."
+        return f"✅ Available | Stock: {qty} | Price: Rs.{item.get('price')}"
+
     if qty > 0:
-        return f"Limited availability. Stock: {qty}. Please confirm with shop."
-    return "Currently unavailable. You can raise a request."
+        return f"⚠️ Limited availability | Stock: {qty}"
+
+    return "❌ Currently unavailable"
 
 
 def search_products(query, shop_type=None, limit=8):
+
     df = load_inventory()
 
     if shop_type and shop_type != "All":
-        df = df[df["shop_type"].str.lower() == shop_type.lower()]
+
+        df = df[
+            df["shop_type"].str.lower() == shop_type.lower()
+        ]
 
     if df.empty or not query.strip():
         return []
 
     query_text = query.lower().strip()
+
     results = []
 
     for _, row in df.iterrows():
+
         searchable_text = " ".join([
+
             str(row.get("product_name", "")),
             str(row.get("category", "")),
             str(row.get("brand", "")),
             str(row.get("variant", "")),
             str(row.get("shop_name", "")),
-            str(row.get("shop_type", "")),
+            str(row.get("shop_type", ""))
+
         ]).lower()
 
-        score = fuzz.token_set_ratio(query_text, searchable_text)
+        score = fuzz.token_set_ratio(
+            query_text,
+            searchable_text
+        )
 
         if score >= 45:
+
             result = row.to_dict()
+
             result["match_score"] = score
-            result["availability_message"] = build_availability_message(result)
+
+            result["availability_message"] = (
+                build_availability_message(result)
+            )
+
             results.append(result)
 
-    results = sorted(results, key=lambda x: x["match_score"], reverse=True)
+    results = sorted(
+        results,
+        key=lambda x: x["match_score"],
+        reverse=True
+    )
+
     return results[:limit]
 
 
 def generate_bot_reply(query, customer_phone="", shop_type=None):
-    results = search_products(query, shop_type=shop_type)
+
+    results = search_products(
+        query,
+        shop_type=shop_type
+    )
 
     if not results:
+
         return {
             "found": False,
             "reply": (
-                f"Sorry, I could not find '{query}'. "
-                "You can raise a request and the shop can arrange it if possible."
+                f"❌ Product not found: '{query}'\n\n"
+                f"You can raise a request using:\n"
+                f"--request {query}"
             ),
             "results": []
         }
 
     top = results[0]
+
     reply = (
-        f"{top['product_name']} is available at {top['shop_name']}.\n"
-        f"Category: {top['category']}\n"
-        f"Brand: {top['brand']}\n"
-        f"Variant: {top['variant']}\n"
+        f"✅ PRODUCT FOUND\n\n"
+        f"📦 Product: {top['product_name']}\n"
+        f"🏪 Shop: {top['shop_name']}\n"
+        f"🧾 Category: {top['category']}\n"
+        f"🏷 Brand: {top['brand']}\n"
+        f"📌 Variant: {top['variant']}\n"
         f"{top['availability_message']}"
     )
 
     alternatives = results[1:4]
+
     if alternatives:
-        reply += "\n\nOther matching options:\n"
-        for alt in alternatives:
-            reply += f"- {alt['product_name']} at {alt['shop_name']} ({alt['availability_message']})\n"
 
-    return {"found": True, "reply": reply, "results": results}
+        reply += "\n\n🔄 OTHER MATCHES:\n"
 
+        for i, alt in enumerate(alternatives, start=1):
+
+            reply += (
+                f"\n{i}. {alt['product_name']}"
+                f"\n🏪 {alt['shop_name']}"
+                f"\n{alt['availability_message']}\n"
+            )
+
+    return {
+        "found": True,
+        "reply": reply,
+        "results": results
+    }
+
+
+# =========================================================
+# WHATSAPP COMMAND PROCESSOR
+# =========================================================
+
+def process_whatsapp_message(message, customer_phone):
+
+    text = message.strip()
+
+    # -----------------------------------------------
+    # HELP
+    # -----------------------------------------------
+
+    if text.startswith("--help"):
+
+        return (
+            "🤖 SHOPBOT COMMANDS\n\n"
+            "🔍 Search Product:\n"
+            "--search iphone 15\n\n"
+
+            "📝 Raise Request:\n"
+            "--request airpods\n\n"
+
+            "📚 View Commands:\n"
+            "--help"
+        )
+
+    # -----------------------------------------------
+    # SEARCH
+    # -----------------------------------------------
+
+    elif text.startswith("--search"):
+
+        query = text.replace(
+            "--search",
+            ""
+        ).strip()
+
+        if not query:
+
+            return (
+                "⚠️ Please enter product name.\n\n"
+                "Example:\n"
+                "--search iphone 15"
+            )
+
+        response = generate_bot_reply(
+            query,
+            customer_phone
+        )
+
+        return response["reply"]
+
+    # -----------------------------------------------
+    # REQUEST PRODUCT
+    # -----------------------------------------------
+
+    elif text.startswith("--request"):
+
+        product = text.replace(
+            "--request",
+            ""
+        ).strip()
+
+        if not product:
+
+            return (
+                "⚠️ Please provide product name.\n\n"
+                "Example:\n"
+                "--request samsung s24"
+            )
+
+        requests_df = load_requests()
+
+        new_row = {
+
+            "request_id": str(uuid.uuid4())[:8],
+
+            "customer_phone": customer_phone,
+
+            "shop_id": "",
+
+            "requested_product": product,
+
+            "created_at": datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+
+            "status": "submitted"
+        }
+
+        requests_df = pd.concat(
+            [requests_df, pd.DataFrame([new_row])],
+            ignore_index=True
+        )
+
+        save_requests(requests_df)
+
+        return (
+            f"✅ Request submitted successfully.\n\n"
+            f"Requested Product: {product}"
+        )
+
+    # -----------------------------------------------
+    # DEFAULT
+    # -----------------------------------------------
+
+    return (
+        "❌ Invalid command.\n\n"
+
+        "Use:\n"
+
+        "--search <product>\n"
+        "--request <product>\n"
+        "--help"
+    )
+
+
+# =========================================================
+# SECURITY
+# =========================================================
+
+@app.before_request
+def protect_admin():
+
+    if request.path.startswith("/admin"):
+
+        key = request.args.get("key")
+
+        if key != ADMIN_KEY:
+            abort(403)
+
+
+# =========================================================
+# WEBSITE ROUTES
+# =========================================================
 
 @app.route("/")
 def home():
+
     df = load_inventory()
-    shop_types = ["All"] + sorted(df["shop_type"].dropna().unique().tolist()) if not df.empty else ["All"]
-    return render_template("index.html", shop_types=shop_types)
+
+    shop_types = (
+        ["All"] +
+        sorted(df["shop_type"].dropna().unique().tolist())
+        if not df.empty else ["All"]
+    )
+
+    return render_template(
+        "index.html",
+        shop_types=shop_types
+    )
 
 
 @app.route("/search", methods=["POST"])
 def search():
+
     query = request.form.get("query", "")
-    shop_type = request.form.get("shop_type", "All")
-    response = generate_bot_reply(query, shop_type=shop_type)
+
+    shop_type = request.form.get(
+        "shop_type",
+        "All"
+    )
+
+    response = generate_bot_reply(
+        query,
+        shop_type=shop_type
+    )
+
     df = load_inventory()
-    shop_types = ["All"] + sorted(df["shop_type"].dropna().unique().tolist()) if not df.empty else ["All"]
+
+    shop_types = (
+        ["All"] +
+        sorted(df["shop_type"].dropna().unique().tolist())
+        if not df.empty else ["All"]
+    )
 
     return render_template(
         "index.html",
@@ -143,66 +409,180 @@ def search():
     )
 
 
+# =========================================================
+# API ROUTES
+# =========================================================
+
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
+
     data = request.get_json(force=True)
+
     query = data.get("message", "")
-    customer_phone = data.get("customer_phone", "")
-    shop_type = data.get("shop_type", None)
-    response = generate_bot_reply(query, customer_phone=customer_phone, shop_type=shop_type)
+
+    customer_phone = data.get(
+        "customer_phone",
+        ""
+    )
+
+    shop_type = data.get(
+        "shop_type",
+        None
+    )
+
+    response = generate_bot_reply(
+        query,
+        customer_phone=customer_phone,
+        shop_type=shop_type
+    )
+
     return jsonify(response)
 
 
+# =========================================================
+# PRODUCT REQUEST ROUTE
+# =========================================================
+
 @app.route("/request-product", methods=["POST"])
 def request_product():
-    requested_product = request.form.get("requested_product", "").strip()
-    customer_phone = request.form.get("customer_phone", "").strip()
-    shop_id = request.form.get("shop_id", "").strip()
+
+    requested_product = request.form.get(
+        "requested_product",
+        ""
+    ).strip()
+
+    customer_phone = request.form.get(
+        "customer_phone",
+        ""
+    ).strip()
+
+    shop_id = request.form.get(
+        "shop_id",
+        ""
+    ).strip()
 
     if not requested_product:
         return redirect(url_for("home"))
 
     requests_df = load_requests()
+
     new_row = {
+
         "request_id": str(uuid.uuid4())[:8],
+
         "customer_phone": customer_phone,
+
         "shop_id": shop_id,
+
         "requested_product": requested_product,
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+
+        "created_at": datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+
         "status": "submitted"
     }
 
-    requests_df = pd.concat([requests_df, pd.DataFrame([new_row])], ignore_index=True)
+    requests_df = pd.concat(
+        [requests_df, pd.DataFrame([new_row])],
+        ignore_index=True
+    )
+
     save_requests(requests_df)
 
-    return render_template("success.html", requested_product=requested_product)
+    return render_template(
+        "success.html",
+        requested_product=requested_product
+    )
 
+
+# =========================================================
+# ADMIN PANEL
+# =========================================================
 
 @app.route("/admin")
 def admin():
-    inventory = load_inventory().to_dict(orient="records")
-    requests_data = load_requests().sort_values("created_at", ascending=False).to_dict(orient="records")
-    return render_template("admin.html", inventory=inventory, requests_data=requests_data)
+
+    inventory = load_inventory().to_dict(
+        orient="records"
+    )
+
+    requests_data = (
+        load_requests()
+        .sort_values("created_at", ascending=False)
+        .to_dict(orient="records")
+    )
+
+    return render_template(
+        "admin.html",
+        inventory=inventory,
+        requests_data=requests_data
+    )
 
 
 @app.route("/admin/add-product", methods=["POST"])
 def add_product():
+
     df = load_inventory()
 
     new_product = {
-        "shop_id": request.form.get("shop_id", "").strip(),
-        "shop_name": request.form.get("shop_name", "").strip(),
-        "shop_type": request.form.get("shop_type", "").strip(),
-        "product_name": request.form.get("product_name", "").strip(),
-        "category": request.form.get("category", "").strip(),
-        "brand": request.form.get("brand", "").strip(),
-        "variant": request.form.get("variant", "").strip(),
-        "price": request.form.get("price", "0").strip(),
-        "quantity": request.form.get("quantity", "0").strip(),
-        "status": request.form.get("status", "available").strip(),
+
+        "shop_id": request.form.get(
+            "shop_id",
+            ""
+        ).strip(),
+
+        "shop_name": request.form.get(
+            "shop_name",
+            ""
+        ).strip(),
+
+        "shop_type": request.form.get(
+            "shop_type",
+            ""
+        ).strip(),
+
+        "product_name": request.form.get(
+            "product_name",
+            ""
+        ).strip(),
+
+        "category": request.form.get(
+            "category",
+            ""
+        ).strip(),
+
+        "brand": request.form.get(
+            "brand",
+            ""
+        ).strip(),
+
+        "variant": request.form.get(
+            "variant",
+            ""
+        ).strip(),
+
+        "price": request.form.get(
+            "price",
+            "0"
+        ).strip(),
+
+        "quantity": request.form.get(
+            "quantity",
+            "0"
+        ).strip(),
+
+        "status": request.form.get(
+            "status",
+            "available"
+        ).strip(),
     }
 
-    df = pd.concat([df, pd.DataFrame([new_product])], ignore_index=True)
+    df = pd.concat(
+        [df, pd.DataFrame([new_product])],
+        ignore_index=True
+    )
+
     save_inventory(df)
 
     return redirect(url_for("admin"))
@@ -210,46 +590,77 @@ def add_product():
 
 @app.route("/admin/upload", methods=["POST"])
 def upload_inventory():
+
     file = request.files.get("inventory_file")
 
     if not file:
         return redirect(url_for("admin"))
 
     df = pd.read_csv(file)
+
     required_cols = [
-        "shop_id", "shop_name", "shop_type", "product_name", "category",
-        "brand", "variant", "price", "quantity", "status"
+
+        "shop_id",
+        "shop_name",
+        "shop_type",
+        "product_name",
+        "category",
+        "brand",
+        "variant",
+        "price",
+        "quantity",
+        "status"
     ]
 
-    missing = [col for col in required_cols if col not in df.columns]
+    missing = [
+        col for col in required_cols
+        if col not in df.columns
+    ]
+
     if missing:
         return f"Missing columns: {missing}", 400
 
     save_inventory(df)
+
     return redirect(url_for("admin"))
 
-from flask import Response
+
+# =========================================================
+# WHATSAPP WEBHOOK
+# =========================================================
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp_webhook():
-    incoming_msg = request.form.get("Body", "").strip()
-    customer_phone = request.form.get("From", "")
 
-    response = generate_bot_reply(
-        incoming_msg,
-        customer_phone=customer_phone,
-        shop_type=None
+    incoming_msg = request.form.get(
+        "Body",
+        ""
+    ).strip()
+
+    customer_phone = request.form.get(
+        "From",
+        ""
     )
 
-    reply_text = response["reply"]
+    reply_text = process_whatsapp_message(
+        incoming_msg,
+        customer_phone
+    )
 
-    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-    <Message>{reply_text}</Message>
-</Response>"""
+    resp = MessagingResponse()
 
-    return Response(twiml, mimetype="application/xml")    
+    resp.message(reply_text)
 
+    return str(resp)
+
+
+# =========================================================
+# RUN APP
+# =========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        host="0.0.0.0",
+        port=5000
+    )
