@@ -437,6 +437,43 @@ def get_bot_response(customer_phone, user_text):
         customer_phone
     )
     # =====================================
+    # WHATSAPP PRODUCT NUMBER SELECTION
+    # =====================================
+
+    if (
+        session.get("flow") == "product_selection"
+        and text.isdigit()
+    ):
+
+        index = int(text) - 1
+
+        products = session.get("products", [])
+
+        if 0 <= index < len(products):
+
+            product = products[index]
+
+            set_customer_session(customer_phone, {
+                "flow": "selected_product",
+                "product": product,
+                "products": products
+            })
+
+            return {
+                "type": "product_detail",
+                "message": format_product_details(product),
+                "product": product,
+                "available": product_is_available(product)
+            }
+
+        return {
+            "type": "text",
+            "message": (
+                "❌ Invalid selection.\n\n"
+                "Reply with valid product number."
+            )
+        }
+    # =====================================
     # REQUEST FLOW
     # =====================================
 
@@ -1387,6 +1424,21 @@ def web_raise_request():
     })
 
 # =========================================================
+# TWILIO CLIENT
+# =========================================================
+
+from twilio.rest import Client
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"
+
+client = Client(
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN
+)
+
+# =========================================================
 # WHATSAPP WEBHOOK
 # =========================================================
 
@@ -1403,24 +1455,22 @@ def whatsapp_webhook():
         ""
     )
 
-    # USE YOUR NEW PREMIUM BOT ENGINE
     response_data = get_bot_response(
         customer_phone,
         incoming_msg
     )
 
-    # =========================================
-    # FORMAT WHATSAPP RESPONSE
-    # =========================================
+    # =====================================================
+    # PRODUCT OPTIONS
+    # =====================================================
 
     if response_data["type"] == "product_options":
 
-        reply_text = "📦 Matching Products\n\n"
+        products = response_data["products"][:3]
 
-        for index, product in enumerate(
-            response_data["products"],
-            start=1
-        ):
+        body_text = "📦 Matching Products\n\n"
+
+        for index, product in enumerate(products, start=1):
 
             available = (
                 "🟢 Available"
@@ -1431,59 +1481,84 @@ def whatsapp_webhook():
                 else "🔴 Out of Stock"
             )
 
-            reply_text += (
+            body_text += (
                 f"{index}. "
                 f"{product.get('product_name','')}\n"
-
-                f"💰 ₹{product.get('price',0)}\n"
-
+                f"₹{product.get('price',0)}\n"
                 f"{available}\n\n"
             )
 
-        reply_text += (
-            "Reply with product name to view details."
+        body_text += (
+            "Tap a button below."
         )
+
+        # SEND INTERACTIVE BUTTONS
+
+        client.messages.create(
+            from_=TWILIO_WHATSAPP_NUMBER,
+            to=customer_phone,
+            body=body_text,
+            persistent_action=[
+                "reply=1",
+                "reply=2",
+                "reply=3"
+            ]
+        )
+
+        return ("", 200)
+
+    # =====================================================
+    # PRODUCT DETAIL
+    # =====================================================
 
     elif response_data["type"] == "product_detail":
 
-        reply_text = response_data.get(
-            "message",
-            ""
-        )
+        detail_text = response_data["message"]
 
         if not response_data.get(
             "available",
             True
         ):
 
-            reply_text += (
-                "\n\nReply:\n"
-                "request"
+            detail_text += (
+                "\n\nTap below to request medicine."
             )
+
+            client.messages.create(
+                from_=TWILIO_WHATSAPP_NUMBER,
+                to=customer_phone,
+                body=detail_text,
+                persistent_action=[
+                    "reply=request"
+                ]
+            )
+
+        else:
+
+            client.messages.create(
+                from_=TWILIO_WHATSAPP_NUMBER,
+                to=customer_phone,
+                body=detail_text
+            )
+
+        return ("", 200)
+
+    # =====================================================
+    # NORMAL TEXT
+    # =====================================================
 
     else:
 
-        reply_text = response_data.get(
-            "message",
-            "Something went wrong."
+        client.messages.create(
+            from_=TWILIO_WHATSAPP_NUMBER,
+            to=customer_phone,
+            body=response_data.get(
+                "message",
+                "Something went wrong."
+            )
         )
 
-    # remove html line breaks if any
-    reply_text = (
-        str(reply_text)
-        .replace("<br>", "\n")
-        .replace("<br/>", "\n")
-    )
-
-    twilio_response = MessagingResponse()
-
-    twilio_response.message(reply_text)
-
-    return Response(
-        str(twilio_response),
-        mimetype="application/xml"
-    )
-
+        return ("", 200)
 # =========================================================
 # DEBUG
 # =========================================================
