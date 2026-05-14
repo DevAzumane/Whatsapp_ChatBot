@@ -11,6 +11,8 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from rapidfuzz import fuzz
+from twilio.twiml.messaging_response import MessagingResponse
+from flask import Response
 
 app = Flask(__name__)
 
@@ -1384,6 +1386,50 @@ def web_raise_request():
         )
     })
 
+# =========================================================
+# WHATSAPP WEBHOOK
+# =========================================================
+
+@app.route("/whatsapp", methods=["POST"])
+def whatsapp_webhook():
+
+    incoming_msg = request.form.get(
+        "Body",
+        ""
+    ).strip()
+
+    customer_phone = request.form.get(
+        "From",
+        ""
+    )
+
+    # USE YOUR NEW PREMIUM BOT ENGINE
+    response_data = get_bot_response(
+        customer_phone,
+        incoming_msg
+    )
+
+    # extract text message
+    reply_text = response_data.get(
+        "message",
+        "Something went wrong."
+    )
+
+    # remove html line breaks if any
+    reply_text = (
+        str(reply_text)
+        .replace("<br>", "\n")
+        .replace("<br/>", "\n")
+    )
+
+    twilio_response = MessagingResponse()
+
+    twilio_response.message(reply_text)
+
+    return Response(
+        str(twilio_response),
+        mimetype="application/xml"
+    )
 
 # =========================================================
 # DEBUG
@@ -1399,7 +1445,6 @@ def debug_inventory():
         "columns": df.columns.tolist(),
         "sample": df.head(5).to_dict(orient="records")
     })
-
 
 # =========================================================
 # START
