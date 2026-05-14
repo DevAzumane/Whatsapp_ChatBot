@@ -1409,11 +1409,64 @@ def whatsapp_webhook():
         incoming_msg
     )
 
-    # extract text message
-    reply_text = response_data.get(
-        "message",
-        "Something went wrong."
-    )
+    # =========================================
+    # FORMAT WHATSAPP RESPONSE
+    # =========================================
+
+    if response_data["type"] == "product_options":
+
+        reply_text = "📦 Matching Products\n\n"
+
+        for index, product in enumerate(
+            response_data["products"],
+            start=1
+        ):
+
+            available = (
+                "🟢 Available"
+                if int(product.get(
+                    "available_quantity",
+                    0
+                )) > 0
+                else "🔴 Out of Stock"
+            )
+
+            reply_text += (
+                f"{index}. "
+                f"{product.get('product_name','')}\n"
+
+                f"💰 ₹{product.get('price',0)}\n"
+
+                f"{available}\n\n"
+            )
+
+        reply_text += (
+            "Reply with product name to view details."
+        )
+
+    elif response_data["type"] == "product_detail":
+
+        reply_text = response_data.get(
+            "message",
+            ""
+        )
+
+        if not response_data.get(
+            "available",
+            True
+        ):
+
+            reply_text += (
+                "\n\nReply:\n"
+                "request"
+            )
+
+    else:
+
+        reply_text = response_data.get(
+            "message",
+            "Something went wrong."
+        )
 
     # remove html line breaks if any
     reply_text = (
