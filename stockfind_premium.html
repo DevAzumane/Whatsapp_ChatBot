@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFind — Instant Stock Availability for Your Retail Business</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #10B981;
+            --primary-dark: #059669;
+            --secondary: #3B82F6;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --dark: #0F172A;
+            --text: #1E293B;
+            --light: #F8FAFC;
+            --border: #E2E8F0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Header/Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            padding: 18px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+        nav {
+            display: flex;
+            gap: 40px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        body {
+            padding-top: 80px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, #0891b2 100%);
+            color: white;
+            padding: 120px 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-40px) rotate(5deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            font-family: 'Sora', sans-serif;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.4em;
+            opacity: 0.95;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .cta-button {
+            background: white;
+            color: var(--primary);
+            padding: 18px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .cta-button:active {
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 50px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 120px 50px;
+            position: relative;
+        }
+
+        section h2 {
+            font-size: 3.2em;
+            margin-bottom: 60px;
+            text-align: center;
+            color: var(--dark);
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        /* Problem Section */
+        .problem {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .problem-content h3 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: var(--danger);
+            font-family: 'Sora', sans-serif;
+        }
+
+        .problem-list {
+            list-style: none;
+        }
+
+        .problem-list li {
+            padding: 16px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 1.1em;
+            color: var(--text);
+            font-weight: 500;
+            animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        .problem-list li:nth-child(1) { animation-delay: 0.1s; }
+        .problem-list li:nth-child(2) { animation-delay: 0.2s; }
+        .problem-list li:nth-child(3) { animation-delay: 0.3s; }
+        .problem-list li:nth-child(4) { animation-delay: 0.4s; }
+        .problem-list li:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .problem-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        .problem-image {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            height: 450px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            box-shadow: 0 20px 60px rgba(239, 68, 68, 0.2);
+            animation: scaleIn 0.8s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Solution Section */
+        .solution {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .solution-image {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            height: 450px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.2);
+            animation: scaleIn 0.8s ease-out;
+            order: 2;
+        }
+
+        .solution-content {
+            order: 1;
+        }
+
+        .solution-content h3 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-family: 'Sora', sans-serif;
+        }
+
+        .solution-list {
+            list-style: none;
+        }
+
+        .solution-list li {
+            padding: 16px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 1.1em;
+            color: var(--text);
+            font-weight: 500;
+            animation: slideInRight 0.6s ease-out forwards;
+        }
+
+        .solution-list li:nth-child(1) { animation-delay: 0.1s; }
+        .solution-list li:nth-child(2) { animation-delay: 0.2s; }
+        .solution-list li:nth-child(3) { animation-delay: 0.3s; }
+        .solution-list li:nth-child(4) { animation-delay: 0.4s; }
+        .solution-list li:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .solution-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        /* Industry Cards */
+        .industries {
+            background: linear-gradient(135deg, #f8fafc 0%, #ecf0f1 100%);
+        }
+
+        .industry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 35px;
+        }
+
+        .industry-card {
+            background: white;
+            border-radius: 20px;
+            padding: 45px 35px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            animation: popIn 0.6s ease-out forwards;
+        }
+
+        .industry-card:nth-child(1) { animation-delay: 0.05s; }
+        .industry-card:nth-child(2) { animation-delay: 0.1s; }
+        .industry-card:nth-child(3) { animation-delay: 0.15s; }
+        .industry-card:nth-child(4) { animation-delay: 0.2s; }
+        .industry-card:nth-child(5) { animation-delay: 0.25s; }
+        .industry-card:nth-child(6) { animation-delay: 0.3s; }
+        .industry-card:nth-child(7) { animation-delay: 0.35s; }
+        .industry-card:nth-child(8) { animation-delay: 0.4s; }
+        .industry-card:nth-child(9) { animation-delay: 0.45s; }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .industry-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .industry-card:hover {
+            transform: translateY(-12px);
+            border-color: var(--primary);
+            box-shadow: 0 16px 48px rgba(16, 185, 129, 0.15);
+        }
+
+        .industry-card:hover::before {
+            opacity: 1;
+        }
+
+        .industry-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        .industry-card:nth-child(2) .industry-icon { animation-delay: 0.1s; }
+        .industry-card:nth-child(3) .industry-icon { animation-delay: 0.2s; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .industry-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-family: 'Sora', sans-serif;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .industry-card p {
+            color: #64748b;
+            line-height: 1.8;
+            font-size: 1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            z-index: -1;
+        }
+
+        .step {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            position: relative;
+            transition: all 0.4s ease;
+            border-top: 4px solid var(--primary);
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .step:nth-child(1) { animation-delay: 0.1s; }
+        .step:nth-child(2) { animation-delay: 0.2s; }
+        .step:nth-child(3) { animation-delay: 0.3s; }
+        .step:nth-child(4) { animation-delay: 0.4s; }
+        .step:nth-child(5) { animation-delay: 0.5s; }
+        .step:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(16, 185, 129, 0.15);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .step h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-family: 'Sora', sans-serif;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: #64748b;
+            font-size: 0.98em;
+            line-height: 1.7;
+        }
+
+        /* Features Section */
+        .features {
+            background: linear-gradient(135deg, #f8fafc 0%, #ecf0f1 100%);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 35px;
+            margin-top: 60px;
+        }
+
+        .feature {
+            background: white;
+            padding: 40px 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+            border-left: 5px solid var(--primary);
+            animation: fadeInScale 0.6s ease-out forwards;
+        }
+
+        .feature:nth-child(1) { animation-delay: 0.1s; }
+        .feature:nth-child(2) { animation-delay: 0.2s; }
+        .feature:nth-child(3) { animation-delay: 0.3s; }
+        .feature:nth-child(4) { animation-delay: 0.4s; }
+        .feature:nth-child(5) { animation-delay: 0.5s; }
+        .feature:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .feature:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(16, 185, 129, 0.15);
+            border-left-color: var(--secondary);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .feature h3 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            color: var(--dark);
+            font-family: 'Sora', sans-serif;
+            font-weight: 600;
+        }
+
+        .feature p {
+            color: #64748b;
+            font-size: 0.96em;
+            line-height: 1.7;
+        }
+
+        /* Real Example */
+        .example {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .example-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .phone-mockup {
+            background: #000;
+            width: 300px;
+            height: 600px;
+            border-radius: 40px;
+            padding: 14px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            animation: phoneSlideIn 0.8s ease-out;
+        }
+
+        @keyframes phoneSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .phone-screen {
+            background: white;
+            width: 100%;
+            height: 100%;
+            border-radius: 32px;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 25px;
+            text-align: center;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .chat-message {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            max-width: 90%;
+            font-size: 13px;
+            line-height: 1.5;
+            font-weight: 500;
+            animation: messageSlide 0.5s ease-out forwards;
+        }
+
+        .message-customer {
+            background: linear-gradient(135deg, #DBEAFE 0%, #BAE6FD 100%);
+            color: #0C4A6E;
+            margin-left: auto;
+        }
+
+        .message-bot {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            color: #065F46;
+            margin-right: auto;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .example-text {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .example-text h3 {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: var(--dark);
+            font-family: 'Sora', sans-serif;
+        }
+
+        .example-text p {
+            color: #64748b;
+            margin-bottom: 18px;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .example-text p strong {
+            color: var(--primary);
+        }
+
+        /* Why Now Section */
+        .why-now {
+            background: linear-gradient(135deg, #f8fafc 0%, #ecf0f1 100%);
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 35px;
+            margin-top: 60px;
+        }
+
+        .timeline-item {
+            background: white;
+            padding: 50px 35px;
+            border-radius: 20px;
+            text-align: center;
+            border-top: 5px solid var(--secondary);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+            animation: popInTimeline 0.6s ease-out forwards;
+        }
+
+        .timeline-item:nth-child(1) { 
+            border-top-color: var(--primary);
+            animation-delay: 0.1s;
+        }
+
+        .timeline-item:nth-child(2) { 
+            animation-delay: 0.2s;
+            transform: scale(1.05);
+        }
+
+        .timeline-item:nth-child(3) { 
+            border-top-color: var(--danger);
+            animation-delay: 0.3s;
+        }
+
+        @keyframes popInTimeline {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .timeline-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 48px rgba(16, 185, 129, 0.15);
+        }
+
+        .timeline-item:nth-child(2):hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+        .timeline-item h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .timeline-item p {
+            color: #64748b;
+            font-size: 1em;
+            line-height: 1.7;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .faq-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #ecf0f1 100%);
+            padding: 35px;
+            border-radius: 16px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.4s ease;
+            animation: fadeInLeft 0.6s ease-out forwards;
+        }
+
+        .faq-item:nth-child(1) { animation-delay: 0.05s; }
+        .faq-item:nth-child(2) { animation-delay: 0.1s; }
+        .faq-item:nth-child(3) { animation-delay: 0.15s; }
+        .faq-item:nth-child(4) { animation-delay: 0.2s; }
+        .faq-item:nth-child(5) { animation-delay: 0.25s; }
+        .faq-item:nth-child(6) { animation-delay: 0.3s; }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .faq-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1);
+            border-left-color: var(--secondary);
+        }
+
+        .faq-item h4 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .faq-item p {
+            color: #64748b;
+            font-size: 0.96em;
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, #0891b2 100%);
+            color: white;
+            text-align: center;
+            padding: 120px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section h2 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-section p {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 50px;
+            font-size: 0.95em;
+        }
+
+        footer p {
+            margin: 10px 0;
+            opacity: 0.85;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            nav a {
+                font-size: 12px;
+            }
+
+            .hero {
+                padding: 80px 20px;
+                min-height: auto;
+            }
+
+            .hero h1 {
+                font-size: 2.2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            section {
+                padding: 60px 20px;
+            }
+
+            section h2 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+
+            .problem-grid,
+            .solution-grid,
+            .example-content,
+            .timeline {
+                grid-template-columns: 1fr;
+            }
+
+            .solution-image {
+                order: -1;
+            }
+
+            .solution-content {
+                order: 0;
+            }
+
+            .industry-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid::before {
+                display: none;
+            }
+
+            .phone-mockup {
+                width: 250px;
+                height: 500px;
+            }
+        }
+
+        /* Scroll animations trigger */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">📦 StockFind</div>
+        <nav>
+            <a href="#problem">Problem</a>
+            <a href="#solution">Solution</a>
+            <a href="#industries">Industries</a>
+            <a href="#how">How It Works</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>📱 Instant Stock Availability<br>at Your Customers' Fingertips</h1>
+            <p>WhatsApp-powered inventory visibility that increases sales</p>
+            <button class="cta-button" onclick="document.getElementById('contact').scrollIntoView();">Book Your Free Demo</button>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="problem scroll-animate">
+        <div class="container">
+            <h2>🤔 The Problem You're Facing</h2>
+            <div class="problem-grid">
+                <div class="problem-content">
+                    <h3>What's Happening Now?</h3>
+                    <ul class="problem-list">
+                        <li>Customers call repeatedly asking "Do you have this in stock?"</li>
+                        <li>Your staff wastes time answering the same questions</li>
+                        <li>Customers don't know availability & visit unnecessarily</li>
+                        <li>Items out of stock → customer goes to competitor</li>
+                        <li>Lost sales and frustrated customers</li>
+                    </ul>
+                </div>
+                <div class="problem-image">
+                    📞❌
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="solution" class="solution scroll-animate">
+        <div class="container">
+            <h2>✨ The Solution: StockFind</h2>
+            <div class="solution-grid">
+                <div class="solution-image">
+                    📱✅
+                </div>
+                <div class="solution-content">
+                    <h3>What Should Happen?</h3>
+                    <ul class="solution-list">
+                        <li>Customer messages your WhatsApp instantly</li>
+                        <li>Automatic reply with stock availability in seconds</li>
+                        <li>No phone calls needed</li>
+                        <li>Your staff focuses on selling, not answering calls</li>
+                        <li>Happy customers → More visits & sales</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Industries Section -->
+    <section id="industries" class="industries scroll-animate">
+        <div class="container">
+            <h2>🏪 Perfect for Any Retail Business</h2>
+            <div class="industry-grid">
+                <div class="industry-card">
+                    <div class="industry-icon">💊</div>
+                    <h3>Medical & Pharmacy</h3>
+                    <p>"Do you have Aspirin?" Customers know instantly what medicines are in stock.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">📱</div>
+                    <h3>Mobile Shop</h3>
+                    <p>"Do you have iPhone 15?" Customers check availability before visiting.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">🔧</div>
+                    <h3>Hardware & Electrical</h3>
+                    <p>"Do you stock this copper wire?" Instant inventory visibility for builders & contractors.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">🚗</div>
+                    <h3>Automobile & Spare Parts</h3>
+                    <p>"Do you have this car battery?" Customers know parts availability in real-time.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">💻</div>
+                    <h3>Computer & Laptop Store</h3>
+                    <p>"Do you have this graphics card?" Gamers & professionals get instant stock info.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">🛋️</div>
+                    <h3>Furniture Store</h3>
+                    <p>"Is this sofa in stock?" Customers confirm availability before coming in.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">👗</div>
+                    <h3>Fashion & Textiles</h3>
+                    <p>"Do you have this in size M?" Instant inventory check for colors, sizes, designs.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">🎧</div>
+                    <h3>Electronics Store</h3>
+                    <p>"Is this headphone model available?" Real-time stock visibility for all products.</p>
+                </div>
+
+                <div class="industry-card">
+                    <div class="industry-icon">⚙️</div>
+                    <h3>And Many More...</h3>
+                    <p>Any retail business where customers ask about stock availability benefits from StockFind.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how" class="how-it-works scroll-animate">
+        <div class="container">
+            <h2>⚙️ How It Works (Super Simple)</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>You Upload Stock</h3>
+                    <p>Tell us what products you have, quantities, prices. Easy list or spreadsheet.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>We Set It Up</h3>
+                    <p>We connect to your WhatsApp (1-2 hours setup). Zero technical work from you.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Customer Asks</h3>
+                    <p>Customer messages your shop number on WhatsApp asking for a product.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Instant Reply</h3>
+                    <p>Bot replies instantly with price, availability, and details. No human needed.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Customer Visits</h3>
+                    <p>Customer knows exactly what they need and comes to your store ready to buy.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <h3>Sale Happens</h3>
+                    <p>Happy customer → More footfall → More sales. Repeat daily.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features scroll-animate">
+        <div class="container">
+            <h2>✨ What You Get</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>WhatsApp Integration</h3>
+                    <p>Works on the platform your customers already use. No app downloads needed.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Instant Replies</h3>
+                    <p>Bot answers in seconds, 24/7. Even when you're busy with customers.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Stock Management</h3>
+                    <p>Simple dashboard to update inventory. No complex systems to learn.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Search</h3>
+                    <p>Handles typos and common product name variations. Works with how people actually search.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📞</div>
+                    <h3>No Phone Chaos</h3>
+                    <p>Fewer incoming calls about stock. Your team can focus on sales & service.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <h3>More Sales</h3>
+                    <p>Customers visit only when you have what they want. Higher conversion rate.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real Example -->
+    <section class="example scroll-animate">
+        <div class="container">
+            <h2>📱 Real Example: What Your Customer Sees</h2>
+            <div class="example-content">
+                <div>
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="chat-header">StockFind</div>
+                            <div class="chat-message message-customer">Do you have iPhone 15 in black?</div>
+                            <div class="chat-message message-bot">✓ iPhone 15 Black<br>₹79,999<br>2 units in stock</div>
+                            <div class="chat-message message-customer">What about the 256GB version?</div>
+                            <div class="chat-message message-bot">✓ iPhone 15 Black 256GB<br>₹89,999<br>1 unit in stock</div>
+                            <div class="chat-message message-customer">Great! I'll visit in 10 mins</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-text">
+                    <h3>What Just Happened?</h3>
+                    <p><strong>Customer Benefits:</strong> No need to call. No wasted travel. Knows exactly what's in stock and the price before arriving.</p>
+                    <p><strong>Your Benefits:</strong> Customer coming with intent to buy. No back-and-forth calls. Streamlined sales process.</p>
+                    <p><strong>The Result:</strong> Instant customer visit + higher conversion = more sales with less effort.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Now -->
+    <section class="why-now scroll-animate">
+        <div class="container">
+            <h2>⏰ Why Start Now?</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>🏆 This Month</h3>
+                    <p>Be the first in your area. Customers know YOUR shop has instant stock info.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>📈 Next Month</h3>
+                    <p>Competitors start copying. Your lead advantage shrinks.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>😔 Later</h3>
+                    <p>Everyone has it. No competitive edge. Just standard feature.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq scroll-animate">
+        <div class="container">
+            <h2>❓ Questions You Might Have</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4>Q: What if I don't know technology?</h4>
+                    <p>No problem! We handle everything. You just update your stock list. We'll guide you through setup.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Q: Will customers actually use it?</h4>
+                    <p>Absolutely! WhatsApp is already their habit. Much easier than calling or visiting blindly.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Q: What if my stock changes daily?</h4>
+                    <p>You update us (takes 2 minutes). We keep the bot info fresh. Or schedule regular syncs.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Q: What if a customer messages at 3 AM?</h4>
+                    <p>Bot replies instantly 24/7. No humans needed. Customer has answer before morning.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Q: Will I have issues if I want to stop?</h4>
+                    <p>No lock-in, no hassle. But you won't want to stop once you see increased sales.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Q: How long is the setup?</h4>
+                    <p>Just 1-2 hours. We handle the technical part. You provide your stock list.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="cta-section scroll-animate">
+        <div class="cta-content">
+            <h2>Ready to Transform Your Business?</h2>
+            <p>Join retail businesses already using StockFind to increase sales and reduce customer calls</p>
+            <button class="cta-button" style="background: white; color: var(--primary);">📞 Book Your Free Demo Call</button>
+            <p style="margin-top: 30px; font-size: 0.95em;">No obligation. 15 minutes. See exactly how it works for your business.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 StockFind. Helping retail businesses sell smarter.</p>
+        <p>📱 WhatsApp-Powered Inventory Management for Retail Businesses</p>
+        <p style="margin-top: 20px; opacity: 0.6;">Contact: [Your WhatsApp Number] | Email: [Your Email]</p>
+    </footer>
+
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.querySelectorAll('.hero::before, .hero::after').forEach(el => {
+                el.style.transform = `translateY(${scrolled * 0.5}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
